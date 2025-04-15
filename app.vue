@@ -52,14 +52,16 @@ const onChangePrimaryPalette = () => {
   });
 }
 
-
+const toggleDarkMode = () => {
+  document.documentElement.classList.toggle('p-dark');
+}
 </script>
 
 <template>
   <div>
     <NuxtRouteAnnouncer />
     <PrimeButton label="Primary" />
-    <PrimeButton label="Secondary" severity="secondary" @click="onClick" />
+    <PrimeButton label="Secondary" severity="secondary" />
     <PrimeButton label="Success" severity="success" :dt="root" />
     <PrimeButton label="Info" severity="info" />
     <PrimeButton label="Warn" severity="warn" />
@@ -70,7 +72,8 @@ const onChangePrimaryPalette = () => {
   <br>
   <div>
     <PrimeButton label="Change primary palette" @click="onChangePrimaryPalette" /><br><br>
-    <PrimeButton label="Change preset of all buttons" @click="onChangePresetOfAllButtons" />
+    <PrimeButton label="Change preset of all buttons" @click="onChangePresetOfAllButtons" /><br><br>
+    <PrimeButton label="Toggle Dark Mode" @click="toggleDarkMode()" />
   </div>
   <br>
   <div>
