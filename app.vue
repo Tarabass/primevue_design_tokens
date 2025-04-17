@@ -1,17 +1,33 @@
 <script setup lang="ts">
-import { updatePrimaryPalette, updatePreset } from '@primeuix/themes';
-
+import { updatePrimaryPalette, updatePreset, useTheme, palette, $dt } from '@primeuix/themes';
 import type { ButtonTokenSections } from '@primeuix/themes/types/button';
+import type { SelectChangeEvent } from 'primevue/select';
+import Aura from '@primeuix/themes/aura';
+import Lara from '@primeuix/themes/lara';
+import Nora from '@primeuix/themes/nora';
+import Material from '@primeuix/themes/material';
 
-const root = ref<ButtonTokenSections.Root>({
-  root: {
-    borderRadius: '9999px',
-  }
+// Custom (own) composable
+const { toggleDarkMode, iconClass } = useDarkMode()
+
+const successButtonTokens = ref<ButtonTokenSections.Root>({
+  borderRadius: '9999px',
 });
+
+const raised = ref({
+  raised: {
+    shadow: 'rgb(38, 57, 77) 0px 20px 30px -10px'
+  }
+})
 
 const onChangePresetOfAllButtons = () => {
   updatePreset({
     components: {
+      select: {
+        root: {
+          borderColor: '#0F0'
+        }
+      },
       button: {
         root: {
           borderRadius: '9999px',
@@ -36,50 +52,72 @@ const onChangePresetOfAllButtons = () => {
   })
 }
 
-const onChangePrimaryPalette = () => {
-  updatePrimaryPalette({
-    50: '{amber.50}',
-    100: '{amber.100}',
-    200: '{amber.200}',
-    300: '{amber.300}',
-    400: '{amber.400}',
-    500: '{amber.500}',
-    600: '{amber.600}',
-    700: '{amber.700}',
-    800: '{amber.800}',
-    900: '{amber.900}',
-    950: '{amber.950}'
-  });
+const primevue = usePrimeVue()
+const primaryPaletteName = ref<string | null>()
+const onChangePrimaryPalette = (event: SelectChangeEvent) => {  
+  if(event.value)
+    updatePrimaryPalette(primevue.config.theme.preset.primitive[event.value])
+  else
+    useTheme({ preset: presets.get(theme.value) })
 }
 
-const toggleDarkMode = () => {
-  document.documentElement.classList.toggle('p-dark');
+const presets = new Map([
+  ['Aura', Aura],
+  ['Lara', Lara],
+  ['Nora', Nora],
+  ['Material', Material]
+])
+
+const theme = ref('Nora')
+const onChangePreset = (value: string) => {
+  useTheme({ preset: presets.get(value) })
+  primaryPaletteName.value = null
 }
+
+const primaryColor = computed(() => palette(`{${primaryPaletteName.value}}`));
+const primaryColorDT = computed(() => $dt('button.primary.color') )
 </script>
 
 <template>
-  <div>
-    <NuxtRouteAnnouncer />
+  {{ primaryColorDT }}
+  <div style="display: flex; gap: 1rem; padding: 1rem;">
     <PrimeButton label="Primary" />
     <PrimeButton label="Secondary" severity="secondary" />
-    <PrimeButton label="Success" severity="success" :dt="root" />
+    <PrimeButton label="Success" severity="success" :dt="successButtonTokens" />
     <PrimeButton label="Info" severity="info" />
     <PrimeButton label="Warn" severity="warn" />
     <PrimeButton label="Help" severity="help" />
     <PrimeButton label="Danger" severity="danger" />
-    <PrimeButton label="Contrast" severity="contrast" />
+    <PrimeButton label="Contrast" severity="contrast" raised :dt="raised" />
   </div>
-  <br>
-  <div>
-    <PrimeButton label="Change primary palette" @click="onChangePrimaryPalette" /><br><br>
-    <PrimeButton label="Change preset of all buttons" @click="onChangePresetOfAllButtons" /><br><br>
-    <PrimeButton label="Toggle Dark Mode" @click="toggleDarkMode()" />
+  <div style="display: flex; gap: 1rem; padding: 1rem;">
+    <PrimeSelect v-model="primaryPaletteName" v-tooltip.bottom="{ value: JSON.stringify(primaryColor), autoHide: false }" :options="Object.keys($primevue.config.theme.preset.primitive).slice(1)" show-clear placeholder="Change primary palette" @change="onChangePrimaryPalette" />
+    <PrimeButton label="Change preset of all buttons" @click="onChangePresetOfAllButtons" />
   </div>
-  <br>
-  <div>
-    <a href="https://stackblitz.com/edit/nuxt-starter-6e2pbfgg?file=nuxt.config.ts">Nuxt starter with preset</a><br>
-    <a href="https://github.com/primefaces/primeuix/blob/main/packages/themes/src/presets/material/button/index.ts">Theme
-      preset example</a><br>
-    <a href="https://primevue.org/theming/styled/#extend">Custom tokens and styles</a>
+  <div style="display: flex; gap: .5rem; padding: 1rem;">
+    <PrimeSelectButton v-model="theme" :options="presets.keys().toArray()" :unselectable="false" @update:model-value="onChangePreset" />
+    <PrimeButton :icon="`pi ${iconClass}`" @click="toggleDarkMode()" />
   </div>
+  <div style="display: flex; gap: .25rem">
+    <PrimeButton as="a" variant="link" label="Nuxt starter with preset" href="https://stackblitz.com/edit/nuxt-starter-6e2pbfgg?file=nuxt.config.ts" target="_blank" rel="noopener" />
+    <PrimeButton as="a" variant="link" label="Theme preset example" href="https://github.com/primefaces/primeuix/blob/main/packages/themes/src/presets/material/button/index.ts" target="_blank" rel="noopener" />
+    <PrimeButton as="a" variant="link" label="Custom tokens and styles" href="https://primevue.org/theming/styled/#extend" target="_blank" rel="noopener" />
+  </div>
+  <div style="display: flex; gap: 1rem; padding: 1rem;">
+    <PrimeCard>
+      <template #title>Primitives</template>
+      <template #subtitle>$primevue.config.theme.preset.primitive</template>
+      <template #content>
+        <pre>{{ $primevue.config.theme.preset.primitive }}</pre>
+      </template>
+    </PrimeCard>
+    <PrimeCard>
+      <template #title>Complete theme</template>
+      <template #subtitle>$primevue.config.theme</template>
+      <template #content>
+        <pre>{{ $primevue.config.theme }}</pre>
+      </template>
+    </PrimeCard>
+  </div>
+  <PrimeScrollTop />
 </template>

@@ -36,7 +36,7 @@ export default defineNuxtConfig({
   primevue: {
     options: {
       theme: {
-      preset: MyPreset,
+        preset: MyPreset,
         options: {
           prefix: 'p',
           darkModeSelector: '.p-dark',
@@ -52,5 +52,6 @@ export default defineNuxtConfig({
     directives: {
       prefix: 'prime'
     }
-  }
+  },
+  css: ['primeicons/primeicons.css']
 })
