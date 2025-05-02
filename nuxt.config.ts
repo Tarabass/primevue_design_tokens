@@ -1,3 +1,5 @@
+import path from 'path';
+import tailwindcss from "@tailwindcss/vite";
 // import Aura from '@primeuix/themes/aura';
 import Nora from '@primeuix/themes/nora';
 import { definePreset } from '@primeuix/themes';
@@ -53,5 +55,10 @@ export default defineNuxtConfig({
       prefix: 'prime'
     }
   },
-  css: ['primeicons/primeicons.css']
+  css: [path.join(__dirname, './assets/css/main.css'), 'primeicons/primeicons.css'],
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
+  },
 })
